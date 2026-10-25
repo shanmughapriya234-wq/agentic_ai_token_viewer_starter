@@ -7,11 +7,17 @@ requires-python = ">=3.11"
 # uv add in the backend folder, which updates uv.lock too.
 dependencies = [
     "fastapi>=0.159.1,<0.160",
+    "huggingface-hub>=2.3.0",
+    "jinja2>=3.1.6",
     "pydantic>=2.14.1,<3",
+    "tokenizers>=0.23.3",
     "uvicorn>=0.54.0,<0.55",
 ]
 # Yours: a [project.scripts] table with the command that starts your terminal
 # view, as in token_lab/pyproject.toml in the course repository.
+
+[project.scripts]
+token-viewer-terminal = "token_viewer.terminal_view:main"
 
 [build-system]
 requires = ["uv_build>=0.13.4,<0.14.0"]
