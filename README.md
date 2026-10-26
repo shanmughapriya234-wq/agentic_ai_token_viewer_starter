@@ -39,7 +39,13 @@ npm run dev
 
 Open <http://localhost:5173>. Starter: the page shows the fake controller's made-up tokens; [GUIDE.md](GUIDE.md#try-the-starter) says what to try first.
 
-The terminal view: _yours, the command that starts it._
+The terminal view, in a terminal of its own in `backend`:
+
+```console
+uv run token-viewer-terminal
+```
+
+It loads the model, sets the course request's messages and prints every token of both views. `--messages file.json` reads other messages, and `--repository` and `--revision` choose another model.
 
 The tests and checks: see [Checks](#checks).
 
@@ -55,8 +61,13 @@ flowchart LR
 
 Vite's proxy passes every request under `/api` on to uvicorn, so the page and the API share one origin and need no CORS.
 
-_Yours: complete the map and explain it._ Where do the model's files come from, and when? Where does the terminal view run? Which process holds the state, and what happens to it when uvicorn restarts? Which process does each debugger attach to?
+The terminal view is a third process: `uv run token-viewer-terminal` starts its own Python process, which calls `build_controller()` itself. It has its own `TokenController` and `TokenModel`, the same classes as uvicorn's, but its own state. It shares nothing with the page.
 
+The model's files, `tokenizer.json` and `chat_template.jinja`, come from Hugging Face at the pinned revision, on the first **Load model**. They are kept in `backend/downloads/<first 12 characters of the revision>/`, which Git ignores. After that, loading reads them from disk and works offline.
+
+The state (loaded tokenizer, messages, current view, selected token) lives in the `TokenModel` inside uvicorn's process. When uvicorn restarts, that state is gone and the page shows nothing until **Load model** runs again. The downloaded files stay on disk.
+
+The browser debugger attaches to the page in the browser (`main.ts`, `api.ts`). The Python debugger attaches to uvicorn (routes in `api.py`, `TokenController`, `TokenModel`). Vite only passes requests on, so no breakpoint stops there.
 ## 3. Debugging
 
 Stop the back end from section 1 by closing its terminal (**Kill Terminal**) or with Ctrl+C in it, and keep Vite running. Then select **Run and Debug**, choose **Full stack: back end + browser** and click **Start Debugging**.
@@ -69,23 +80,49 @@ If your code ever reads a key or a Hugging Face token, collapse **Variables** be
 
 ## 4. What works
 
-_Yours: what works, in the order of the task sheet, and the steps that show it._
+**Step 1, terminal view, 24 tokens: works.** Run `uv run token-viewer-terminal` in `backend`. The chat view shows 24 tokens with the same IDs, in the same order, as `uv run tokenize-chat` in token_lab: from `<|im_start|>` (10) to `</think>` (13). `<|im_start|>` and `<|im_end|>` are marked special, while `<think>` and `</think>` are added tokens but not special. The text alone, `Explain tokenization in one sentence.`, gives 8 tokens.
+
+**Step 2, the page: works.** Start the back end and the page as in section 1 and open <http://localhost:5173>.
+
+1. Repository `nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4`, revision `bee7596271d1495f6992ae224aefde4410e816b8`, **Load model**.
+2. Messages `[{"role": "user", "content": "Explain tokenization in one sentence."}]`, **Set messages**: 24 tokens, the same as the terminal view, and no "made-up data" notice.
+3. **View** "Text alone": 8 tokens, and the selection is cleared.
+4. Click a token: **Selected token** shows its index, ID, piece, text, start and end.
+
+The page and the terminal view run at the same time, each in its own process with its own instances. A selection on the page does not affect the terminal view.
+
+**Step 3, emoji and offsets:** not done yet. **Step 4, captures:** not done yet. **Load capture** answers that it is not implemented.
 
 ## 5. Architecture
 
 | Role | In this repository | May not |
 |---|---|---|
-| Model | _yours_ | import a view, a UI library or a web framework such as FastAPI |
+| Model | `token_model.py`: `TokenModel`, which downloads and loads the tokenizer and chat template, renders and encodes, and holds the state | import a view, a UI library or a web framework such as FastAPI |
 | Controller | the interface in `controller.py` and your class; `wiring.py` chooses it | render anything (HTML, terminal output) |
 | View | the page in `frontend/` with its routes in `api.py`; your terminal view | import the tokenizer libraries, contain domain logic |
 
 Starter: [GUIDE.md](GUIDE.md#the-contract) explains the contract between the view-models and the page, and the two meanings of model and view.
 
-_Yours: your view-model, where the state lives, and the change that put the page on your controller: `wiring.py` only, with no change to the model or the controller._
+**View-model:** unchanged from the starter. Our controller fills the existing fields, so the page needed no change, and `npm run types` was not needed.
+
+**State:** in `TokenModel`, one instance per process: the repository, revision, tokenizer, template, messages, both views' text and tokens, the current view and the selected index. `TokenController` holds only its model. It checks input, calls one model operation per command, and turns a `TokenModelError` into a `CommandError`.
+
+**View-model:** unchanged from the starter. Our controller fills the existing fields, so the page needed no change, and `npm run types` was not needed.
+
+**State:** in `TokenModel`, one instance per process: the repository, revision, tokenizer, template, messages, both views' text and tokens, the current view and the selected index. `TokenController` holds only its model. It checks input, calls one model operation per command, and turns a `TokenModelError` into a `CommandError`.
+
+**The change that put the page on our controller:** commit `603acfe` changes only `backend/src/token_viewer/wiring.py`, from `FakeController()` to `TokenController()`. The commit before it, `ac052cf`, set it back to the fake to show the "before" state. `git show --stat 603acfe` lists one file. No change to the model, the controller or the page.**View-model:** unchanged from the starter. Our controller fills the existing fields, so the page needed no change, and `npm run types` was not needed.
+
+**State:** in `TokenModel`, one instance per process: the repository, revision, tokenizer, template, messages, both views' text and tokens, the current view and the selected index. `TokenController` holds only its model. It checks input, calls one model operation per command, and turns a `TokenModelError` into a `CommandError`.
+
+**The change that put the page on our controller:** commit `603acfe` changes only `backend/src/token_viewer/wiring.py`, from `FakeController()` to `TokenController()`. The commit before it, `ac052cf`, set it back to the fake to show the "before" state. `git show --stat 603acfe` lists one file. No change to the model, the controller or the page.
 
 ## 6. Decisions
 
-_Yours: short records of your decisions and their reasons: which files and which revision, which libraries, and where your design departs from textbook MVC._
+- **Files and revision:** only `tokenizer.json` and `chat_template.jinja` from `nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4` at revision `bee7596271d1495f6992ae224aefde4410e816b8`, the same as token_lab, so the IDs match `tokenize-chat`. The weights are not needed.
+- **Libraries:** `huggingface-hub` to download, `tokenizers` to encode, `jinja2` (sandboxed) to render the template, the same as token_lab. `transformers` gives the same tokens but is a much larger install.
+- **Encoding:** `add_special_tokens=False`, because the chat template already writes every marker. Adding them again would change the count.
+- **Text alone:** the message contents joined with a newline, encoded without the template.
 
 Starter: three questions are left open on purpose. Decide them, and record what you chose and why:
 
