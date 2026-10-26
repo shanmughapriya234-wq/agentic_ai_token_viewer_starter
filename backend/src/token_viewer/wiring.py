@@ -6,7 +6,7 @@ state.
 """
 
 from token_viewer.controller import Controller
-from token_viewer.token_controller import TokenController
+from token_viewer.fake_controller import FakeController
 
 
 def build_controller() -> Controller:
@@ -14,6 +14,4 @@ def build_controller() -> Controller:
     # Importing api.py calls this, and the route tests import api.py: keep it
     # quick and offline. Download files when the load_model command runs, not
     # here.
-    # Yours: replace FakeController() with your own controller, built on your
-    # model, both in modules of your own in this package.
-    return TokenController()
+    return FakeController()
