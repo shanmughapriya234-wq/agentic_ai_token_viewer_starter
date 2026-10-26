@@ -3,8 +3,7 @@ name = "token-viewer"
 version = "0.1.0"
 description = "Token viewer back end: the controller, the view-models and a FastAPI layer for the page"
 requires-python = ">=3.11"
-# Yours: the libraries your code needs, such as your model's. Add each with
-# uv add in the backend folder, which updates uv.lock too.
+
 dependencies = [
     "fastapi>=0.159.1,<0.160",
     "huggingface-hub>=2.3.0",
