@@ -57,12 +57,15 @@ class TokenView(BaseModel):
     """The vocabulary entry for this ID."""
     text: str
     """The token's text, as the views show it."""
-    # Yours: decide what start and end count, and say so in their docstrings
-    # (README.md, section 6).
     start: int
-    """Where the token begins in the text of its view."""
+    """Where the token begins in the text of its view.
+    Counted in Unicode code points from 0, like a Python string index.
+    """
     end: int
-    """Where the token ends in the text of its view."""
+    """Where the token ends in the text of its view.
+    Counted in the same unit and exclusive, so text[start:end] is the token's
+    text. Tokens that split one character share its start and end.
+    """
     special: bool
     """Whether the token is a special token."""
 

@@ -251,11 +251,14 @@ export interface components {
             /**
              * Start
              * @description Where the token begins in the text of its view.
+             *     Counted in Unicode code points from 0, like a Python string index.
              */
             start: number;
             /**
              * End
              * @description Where the token ends in the text of its view.
+             *     Counted in the same unit and exclusive, so text[start:end] is the token's
+             *     text. Tokens that split one character share its start and end.
              */
             end: number;
             /**

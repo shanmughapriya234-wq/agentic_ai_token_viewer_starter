@@ -49,6 +49,41 @@ def _download(repository: str, revision: str, folder: Path, filename: str) -> Pa
     return Path(path)
 
 
+def _byte_of_character() -> dict[str, int]:
+    """Return the byte that each character of a byte-level BPE piece stands for."""
+    bytes_kept: list[int] = (
+        list(range(ord("!"), ord("~") + 1))
+        + list(range(0xA1, 0xAC + 1))
+        + list(range(0xAE, 0xFF + 1))
+    )
+    characters: list[int] = bytes_kept.copy()
+    extra: int = 0
+    for byte in range(256):
+        if byte not in bytes_kept:
+            bytes_kept.append(byte)
+            characters.append(256 + extra)
+            extra += 1
+    return {chr(code): byte for byte, code in zip(bytes_kept, characters, strict=True)}
+
+
+_BYTE_OF: dict[str, int] = _byte_of_character()
+
+
+def _token_text(tokenizer: Tokenizer, token_id: int, piece: str) -> str:
+    """Return a token's text; a piece that is only part of a character shows its bytes.
+
+    Args:
+        tokenizer: The loaded tokenizer.
+        token_id: The token's ID.
+        piece: The token's vocabulary entry.
+    """
+    text: str = tokenizer.decode([token_id], skip_special_tokens=False)
+    if "\ufffd" not in text:
+        return text
+    raw: list[int] = [_BYTE_OF[ch] for ch in piece if ch in _BYTE_OF]
+    return "<" + " ".join(f"0x{byte:02X}" for byte in raw) + ">"
+
+
 def _tokens(tokenizer: Tokenizer, text: str, special_ids: set[int]) -> list[Token]:
     """Encode a text and return its tokens.
 
@@ -63,7 +98,7 @@ def _tokens(tokenizer: Tokenizer, text: str, special_ids: set[int]) -> list[Toke
             index=index,
             id=token_id,
             piece=piece,
-            text=tokenizer.decode([token_id], skip_special_tokens=False),
+            text=_token_text(tokenizer, token_id, piece),
             start=start,
             end=end,
             special=token_id in special_ids,

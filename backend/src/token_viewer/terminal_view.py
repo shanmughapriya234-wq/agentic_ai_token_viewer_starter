@@ -23,12 +23,13 @@ def _show(view_model: ViewModel) -> None:
     key: str = view_model.current_view or ""
     print(f"\n=== {titles.get(key, key)} ===")
     print(f"Text: {view_model.text!r}\n")
-    print("  idx       ID  vocabulary entry  decoded text")
+    print("  idx       ID  start-end  vocabulary entry  decoded text")
     for token in view_model.tokens:
         mark: str = "  special token" if token.special else ""
+        span: str = f"{token.start}-{token.end}"
         print(
-            f"  {token.index:>3}  {token.id:>7}  {token.piece!r:<16}  "
-            f"{token.text!r}{mark}"
+            f"  {token.index:>3}  {token.id:>7}  {span:>9}  "
+            f"{token.piece!r:<16}  {token.text!r}{mark}"
         )
     print(f"\nCount: {len(view_model.tokens)} tokens")
 
