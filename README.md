@@ -74,7 +74,13 @@ Stop the back end from section 1 by closing its terminal (**Kill Terminal**) or 
 
 Starter: [GUIDE.md](GUIDE.md#debugging) shows where the first breakpoints go and what **Call Stack**, **Variables** and **Network** show there.
 
-_Yours: your breakpoints in the model, where the chat template is rendered and where the text is encoded, and what **Variables** shows there._
+**Where the chat template is rendered:** `token_model.py`, line 151, in `TokenModel.set_messages`, on `chat_text: str = sandbox.from_string(self.template).render(`. **Set messages** stops here. **Variables** shows `messages`, the role and content pairs from the page, and `self.template`, the chat template. The render call spans lines 151–157, so it takes a few **Step Over** to reach line 158. Then the local `chat_text` holds the rendered text, from `<|im_start|>system` to `<think></think>`. `self.chat_text` and `self.messages` are still the old values: the model assigns its state only after every step has worked.
+
+**Where the text is encoded:** `token_model.py`, line 60, in `_tokens`, on `tokenizer.encode(text, add_special_tokens=False)`. It stops twice per **Set messages**: first with `text` as the rendered chat text, then with the message content alone. After **Step Over**, `encoding.ids` holds the 24 IDs, and the second time 8. `encoding.tokens` holds the pieces and `encoding.offsets` the positions.
+
+**One click through the processes:** click the chip `Ex` (index 8). The page sends `POST /api/selection`, and Vite passes it on to uvicorn. Breakpoints: `api.py` line 155 in the route `select`, where `body` is the parsed request with `index=8`; `token_controller.py` line 66 in `select_token`; `token_model.py` line 199 in `TokenModel.select`. At the last one, **Call Stack** shows, innermost first: `select` (model), `<lambda>` and `_carry_out` (controller), `select_token` (controller), `select` (route in `api.py`). After **Continue**, the page shows the token under **Selected token**.
+
+To debug, use the **Continue** button in the debug toolbar. While a session runs, F5 may offer to start a second back end; choose **Cancel**.
 
 If your code ever reads a key or a Hugging Face token, collapse **Variables** before you share your screen.
 
@@ -134,8 +140,9 @@ Starter: three questions are left open on purpose. Decide them, and record what 
 
 Every prompt goes into [AI_USAGE.md](AI_USAGE.md). Editor AI suggestions stay off: the workspace switches off VS Code's inline suggestions and Copilot's next edit suggestions, because they write code without a prompt that could go into the log. Chat stays available for questions and hints.
 
-_Yours: two or three representative prompts from the log, what you learned from each, and what you decided yourselves._
-
+- **P1** (step 2): we asked what step 2 still needs. We learned that the page needed no code change, only the `wiring.py` switch, and that the proof is a commit that changes only that file. We decided to make two commits, fake then ours (`ac052cf`, `603acfe`), so before and after are both visible in the history.
+- **"[screenshot: IndentationError in wiring.py]"**: we learned that Python treats spaces at the start of a line as structure, and that uvicorn's traceback names the file and line. We now run `uv run ruff format` before every commit.
+- **"[screenshot: page showing HTTP 400 / 404 after Load model]"**: we learned that a copied space in front of the repository or revision makes Hugging Face reject it, and that our controller turns that into a readable error instead of a crash. We decided to keep the error text as it is, because it names the bad value.
 ## Checks
 
 Run each block from the repository folder, each in a terminal of its own:
@@ -183,3 +190,5 @@ The back end needs Python 3.11 or newer; uv installs Python 3.13, which `backend
 | On Windows, `uv run mypy` stops with "DLL load failed while importing mypy", followed by a text in the language of Windows (in English: "The filename or extension is too long"), `uv run ruff check` with "os error 3", or Git with "Filename too long" | The clone lies too deep for the Windows path limit. Clone it into a short folder, such as `C:\Users\<name>\repos\token-viewer`, outside OneDrive. |
 | A terminal does not know `uv` or `npm`, or the task **uv: sync** cannot find uv | Restart VS Code after installing uv or Node.js, so that its terminals and tasks get the new PATH. Then check with `uv --version` and `node --version`. |
 | **Front end: browser (Edge)** or **(Chrome)** reports "Unable to attach to browser" or "Could not find any debuggable target", or the browser is not installed | Use the integrated browser, as **Full stack: back end + browser** does. On some Windows setups Edge restarts itself in a new process when VS Code starts it, and the debugger loses it. |
+
+   | 2026-10-27 | Claude Opus 5.5 (claude.ai) | [screenshots of debugging: breakpoints at render, encode and chip click] / what to fill ? | Where the breakpoints go, what Variables and Call Stack show, and the README text for sections 3 and 7. |
