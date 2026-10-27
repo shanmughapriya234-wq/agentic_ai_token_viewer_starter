@@ -51,3 +51,4 @@ now this is been done now 2. The page
 * The terminal view and the page are two views on the same model and controller classes. Each runs in its own process, with its own instance.
 * The proof of your design: the page, written by someone else, works with your controller after a change to `wiring.py` only, without any change to your model or your controller. are we solving this ?
 ````
+   | 2026-10-27 | Claude Opus 5.5 (claude.ai) | have completed all these ? / now what i ;eft that i need to complete / i want complete my task completely now | Step 2 works; left: this log, README sections 3 and 7, push after the invite. |
