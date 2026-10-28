@@ -31,6 +31,9 @@ Every prompt to a coding agent or a chatbot about this project goes here. Asking
 | 2026-10-27 | Claude Opus 5.5 (claude.ai) | [screenshots of debugging: HTTP 400 and 404 after Load model] / evan after remving the extra space same issue | A space in front of the repository or revision made Hugging Face reject it; our controller showed it as a readable error. |
 | 2026-10-27 | Claude Opus 5.5 (claude.ai) | [screenshots of debugging: breakpoints at render, encode and chip click] / what to fill ? | Where the breakpoints go, what Variables and Call Stack show, and the README text for sections 3 and 7. |
 | 2026-10-27 | Claude Opus 5.5 (claude.ai) | i messed it up | Replaced AI_USAGE.md with a clean version, all rows in one table. |
+| 2026-10-28 | Claude Opus 5.5 (claude.ai) | Captures (step 4 of the task sheet, pasted) i want to solve this / give me solution to solve this / tell me what needs to be done step by step | Claude first gave only the plan and hints: CaptureView fields, fake values, load_capture in the model, re-tokenized views, local prompt count, controller. |
+| 2026-10-28 | Claude Opus 5.5 (claude.ai) | i dont have python background so just give me the code / see i dont have any backgrounf but my professor is okay with so just give the code | After we said our professor allowed it, Claude wrote the step 4 code (view-model fields, fake values, TokenModel.load_capture, re-tokenized views, local prompt count, controller, tests and a hand-made capture). We replaced the files, ran all checks (40 tests) and tried it on the page. |
+| 2026-10-28 | Claude Opus 5.5 (claude.ai) | [screenshots while applying step 4, the README and this log] | Step-by-step help to replace the files, fix the empty capture file, run the checks, try the page, write README sections 4 and 6, and fix this table. |
 
 ## Long prompts
 

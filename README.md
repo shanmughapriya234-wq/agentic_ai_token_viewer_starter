@@ -97,8 +97,9 @@ If your code ever reads a key or a Hugging Face token, collapse **Variables** be
 
 The page and the terminal view run at the same time, each in its own process with its own instances. A selection on the page does not affect the terminal view.
 
-**Step 3, emoji and offsets:** not done yet. **Step 4, captures:** not done yet. **Load capture** answers that it is not implemented.
+**Step 3, emoji and offsets:** see your teammate's notes.
 
+**Step 4, captures: works.** After **Load model** and **Set messages**, choose a capture file under **Capture file**, as `capture-nvidia-response` writes it (for a test, `backend/tests/handmade_capture.json`, a hand-made file), and click **Load capture**. The page shows the answer and the reasoning, adds the views "Answer from the capture, re-tokenized" and "Reasoning from the capture, re-tokenized", and lists the response metadata. With the course request, the local prompt count (24) matches the reported one (24). A capture loaded before a model shows only the metadata; **Load model** then re-tokenizes it.
 ## 5. Architecture
 
 | Role | In this repository | May not |
@@ -135,6 +136,7 @@ Starter: three questions are left open on purpose. Decide them, and record what 
 - **Template switches.** No command and no view-model field carries the chat template's switches, such as thinking on or off, although the course request sets one. Where do they belong?
 - **Offsets.** `TokenView.start` and `TokenView.end` do not say what they count. Which unit do you choose?
 - **Capture metadata.** A capture is the file that [capture-nvidia-response](https://github.com/L3GJ0N/engineering_agentic_ai_systems_hs_aalen/tree/main/llm_inference#run-the-project) in the course repository writes. The task lists the metadata a capture should show. Which of them are the provider's statements, and which are your own local reconstruction? How do your views show the difference?
+  Our choice: the provider states the reported model, the HTTP status, the finish reason, the usage and the texts. Our own are the requested model (what we sent), the provider's name (the host of the request URL), both times (measured on the laptop) and `prompt_tokens_local` (the request's messages through our chat template and tokenizer). Each field's description in `CaptureView` says which. The answer and reasoning views say "re-tokenized": the capture holds only the text, and encoding it again need not give the tokens the model generated.
 
 ## 7. AI use
 
