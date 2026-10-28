@@ -116,8 +116,8 @@ class ViewOption(BaseModel):
 class CaptureView(BaseModel):
     """A captured provider response.
 
-    A first version with the two texts only. Add the response metadata the
-    task asks for.
+    The texts come from the provider's response. Each field's description says
+    who states it: the provider, or a local measurement or reconstruction.
     """
 
     model_config = ConfigDict(use_attribute_docstrings=True)
@@ -128,7 +128,28 @@ class CaptureView(BaseModel):
     """The answer text, or None if the response has none."""
     reasoning: str | None
     """The reasoning text, or None if the response has none."""
-    # Yours: the response metadata that "4. Captures" on the task sheet lists.
+    requested_model: str | None
+    """The model the request asked for, from the request body (sent by us)."""
+    reported_model: str | None
+    """The model the provider names in its response."""
+    provider: str | None
+    """The provider, from the host of the request URL (worked out locally)."""
+    status: int | None
+    """The HTTP status code of the response, or None without a response."""
+    finish_reason: str | None
+    """Why the provider says generation stopped, e.g. "stop" or "length"."""
+    prompt_tokens_reported: int | None
+    """Prompt tokens, as the provider reports them in its usage."""
+    completion_tokens_reported: int | None
+    """Completion tokens, as the provider reports them in its usage."""
+    total_tokens_reported: int | None
+    """Total tokens, as the provider reports them in its usage."""
+    prompt_tokens_local: int | None
+    """Prompt tokens, counted locally with our chat template and tokenizer."""
+    elapsed_seconds: float | None
+    """Seconds until the response headers arrived, measured locally."""
+    waited_seconds: float | None
+    """Seconds for the whole call, measured locally."""
 
 
 class ViewModel(BaseModel):

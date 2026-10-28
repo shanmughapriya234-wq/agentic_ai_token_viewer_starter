@@ -5,6 +5,7 @@ from collections.abc import Callable
 from token_viewer.controller import CommandError, Controller
 from token_viewer.token_model import Token, TokenModel, TokenModelError
 from token_viewer.view_models import (
+    CaptureView,
     Message,
     TokenizerView,
     TokenView,
@@ -29,9 +30,35 @@ class TokenController(Controller):
             tokenizer = TokenizerView(
                 repository=model.repository, revision=model.revision
             )
+        capture: CaptureView | None = None
+        notice: str | None = None
+        if model.capture_name is not None:
+            capture = CaptureView(
+                name=model.capture_name,
+                answer=model.answer,
+                reasoning=model.reasoning,
+                requested_model=model.requested_model,
+                reported_model=model.reported_model,
+                provider=model.provider,
+                status=model.status,
+                finish_reason=model.finish_reason,
+                prompt_tokens_reported=model.prompt_tokens_reported,
+                completion_tokens_reported=model.completion_tokens_reported,
+                total_tokens_reported=model.total_tokens_reported,
+                prompt_tokens_local=model.prompt_tokens_local,
+                elapsed_seconds=model.elapsed_seconds,
+                waited_seconds=model.waited_seconds,
+            )
+            if model.capture_error is not None:
+                notice = f"The capture has no response. {model.capture_error}"
+            elif model.tokenizer is None:
+                notice = (
+                    "Load a model to re-tokenize the capture's answer and "
+                    "reasoning and to count its prompt locally."
+                )
         return ViewModel(
             tokenizer=tokenizer,
-            notice=None,
+            notice=notice,
             messages=[
                 Message(role=role, content=content) for role, content in model.messages
             ],
@@ -40,7 +67,7 @@ class TokenController(Controller):
             text=model.text(),
             tokens=tokens,
             selected=None if model.selected is None else tokens[model.selected],
-            capture=None,
+            capture=capture,
         )
 
     def load_model(self, repository: str, revision: str) -> ViewModel:
@@ -55,8 +82,8 @@ class TokenController(Controller):
         return self._carry_out(lambda: self._model.set_messages(pairs))
 
     def load_capture(self, name: str, content: str) -> ViewModel:
-        """Not implemented yet: captures are step 4 of the task."""
-        raise CommandError("Loading a capture is not implemented yet.")
+        """Read a capture and re-tokenize its answer and reasoning."""
+        return self._carry_out(lambda: self._model.load_capture(name, content))
 
     def select_view(self, key: str) -> ViewModel:
         """Show another view; the model clears the selection."""

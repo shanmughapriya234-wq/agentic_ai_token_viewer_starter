@@ -130,8 +130,8 @@ export interface components {
          * CaptureView
          * @description A captured provider response.
          *
-         *     A first version with the two texts only. Add the response metadata the
-         *     task asks for.
+         *     The texts come from the provider's response. Each field's description says
+         *     who states it: the provider, or a local measurement or reconstruction.
          */
         CaptureView: {
             /**
@@ -149,6 +149,61 @@ export interface components {
              * @description The reasoning text, or None if the response has none.
              */
             reasoning: string | null;
+            /**
+             * Requested Model
+             * @description The model the request asked for, from the request body (sent by us).
+             */
+            requested_model: string | null;
+            /**
+             * Reported Model
+             * @description The model the provider names in its response.
+             */
+            reported_model: string | null;
+            /**
+             * Provider
+             * @description The provider, from the host of the request URL (worked out locally).
+             */
+            provider: string | null;
+            /**
+             * Status
+             * @description The HTTP status code of the response, or None without a response.
+             */
+            status: number | null;
+            /**
+             * Finish Reason
+             * @description Why the provider says generation stopped, e.g. "stop" or "length".
+             */
+            finish_reason: string | null;
+            /**
+             * Prompt Tokens Reported
+             * @description Prompt tokens, as the provider reports them in its usage.
+             */
+            prompt_tokens_reported: number | null;
+            /**
+             * Completion Tokens Reported
+             * @description Completion tokens, as the provider reports them in its usage.
+             */
+            completion_tokens_reported: number | null;
+            /**
+             * Total Tokens Reported
+             * @description Total tokens, as the provider reports them in its usage.
+             */
+            total_tokens_reported: number | null;
+            /**
+             * Prompt Tokens Local
+             * @description Prompt tokens, counted locally with our chat template and tokenizer.
+             */
+            prompt_tokens_local: number | null;
+            /**
+             * Elapsed Seconds
+             * @description Seconds until the response headers arrived, measured locally.
+             */
+            elapsed_seconds: number | null;
+            /**
+             * Waited Seconds
+             * @description Seconds for the whole call, measured locally.
+             */
+            waited_seconds: number | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {

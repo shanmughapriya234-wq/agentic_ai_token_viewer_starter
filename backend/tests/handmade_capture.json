@@ -1,0 +1,49 @@
+{
+  "captured_at": "handmade test file, not a real NVIDIA response",
+  "waited_seconds": 1.25,
+  "request": {
+    "method": "POST",
+    "url": "https://integrate.api.nvidia.com/v1/chat/completions",
+    "headers": {
+      "Authorization": "<removed>"
+    },
+    "body": {
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Explain tokenization in one sentence."
+        }
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    }
+  },
+  "response": {
+    "status_code": 200,
+    "reason": "OK",
+    "headers": {},
+    "body_bytes": 300,
+    "body": {
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "choices": [
+        {
+          "message": {
+            "role": "assistant",
+            "content": "Tokens are pieces.",
+            "reasoning_content": null
+          },
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 24,
+        "completion_tokens": 5,
+        "total_tokens": 29
+      }
+    },
+    "elapsed_seconds": 1.2
+  },
+  "error": null
+}
