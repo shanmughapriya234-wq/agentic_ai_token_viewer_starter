@@ -1,3 +1,8 @@
+# TEAM MEMBERS
+Shanmughapriya mounissamy
+Deepika Murthy
+Divya Theja Erla Anand
+
 # Token viewer
 
 A token viewer for chat requests: given a model on Hugging Face and a list of chat messages, it shows the exact tokens the model reads. It has two views on the same model and controller classes: a page in the browser, written in TypeScript, and a terminal view.
